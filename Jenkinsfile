@@ -27,6 +27,9 @@ pipeline {
             steps {
                 sh 'docker build -t ${REGISTRY_NAME}:${BUILD_NUMBER} .'
                 sh 'docker tag ${REGISTRY_NAME}:${BUILD_NUMBER} ${REGISTRY_NAME}:latest'
+
+                // Enhancement 1: Tag image using Git commit
+                sh 'docker tag ${REGISTRY_NAME}:${BUILD_NUMBER} ${REGISTRY_NAME}:${GIT_COMMIT}'
             }
         }
 
@@ -49,6 +52,13 @@ pipeline {
             steps {
                 sh 'sleep 3'
                 sh 'curl --fail http://host.docker.internal:5000/health'
+            }
+        }
+
+        // Enhancement 2: Test the messages API after deployment
+        stage('6. API Smoke Test') {
+            steps {
+                sh 'curl --fail http://host.docker.internal:5000/messages'
             }
         }
     }
